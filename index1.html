@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Itemcode Lookup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"></noscript>
+<style>
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --surface2:#f1efea; --border:#e4e1da; --text:#1d1b17; --muted:#6b675e;
+  --accent:#4f46e5; --accent-ink:#ffffff; --accent-soft:#eceafd;
+  --ok:#15803d; --ok-bg:#e3f4e7; --warn:#b45309; --warn-bg:#fdeed6; --bad:#b91c1c; --bad-bg:#fbe4e4;
+  --shadow:0 1px 2px rgba(30,25,15,.05),0 4px 14px rgba(30,25,15,.05);
+  --font:"IBM Plex Sans Thai","Noto Sans Thai","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#13141a; --surface:#1b1d25; --surface2:#242731; --border:#2d303b; --text:#ecebe7; --muted:#9a9ca6;
+    --accent:#8f8bff; --accent-ink:#13141a; --accent-soft:#25254a;
+    --ok:#6fd08a; --ok-bg:#16301f; --warn:#f0b266; --warn-bg:#3a2b12; --bad:#ff8c8c; --bad-bg:#3a1b1d; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13141a; --surface:#1b1d25; --surface2:#242731; --border:#2d303b; --text:#ecebe7; --muted:#9a9ca6;
+  --accent:#8f8bff; --accent-ink:#13141a; --accent-soft:#25254a;
+  --ok:#6fd08a; --ok-bg:#16301f; --warn:#f0b266; --warn-bg:#3a2b12; --bad:#ff8c8c; --bad-bg:#3a1b1d; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:9px;height:32px;padding:0 8px;color-scheme:light dark}
+:root[data-theme="dark"] select{color-scheme:dark}:root[data-theme="light"] select{color-scheme:light}
+select option{background:var(--surface);color:var(--text)}
+
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 36px}
+.mono{font-family:var(--mono);font-size:.92em}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px;padding:12px 0}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+.brand i{width:26px;height:26px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-style:normal;font-size:16px}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:-2px}
+.grow{flex:1}
+.chip{font-size:12px;padding:3px 10px;border-radius:99px;font-weight:600}
+.chip.live{background:var(--ok-bg);color:var(--ok)}
+.ibtn{border:1px solid var(--border);background:var(--surface);border-radius:9px;height:32px;padding:0 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.ibtn{white-space:nowrap}
+.ibtn:hover{border-color:var(--accent)}
+.ibtn:focus-visible,.game:focus-visible,.go:focus-visible,.pill-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* search card */
+.search{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+.games{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.game{border:1px solid var(--border);background:var(--surface2);border-radius:99px;padding:3px 11px;cursor:pointer;font-size:13px}
+.game:hover{border-color:var(--accent)}
+.game[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.sbox{display:flex;gap:10px}
+.sbox .field{flex:1;display:flex;align-items:center;gap:10px;border:2px solid var(--border);border-radius:11px;padding:0 12px;background:var(--bg);min-width:0}
+.sbox .field:focus-within{border-color:var(--accent)}
+.sbox input{flex:1;border:0;background:transparent;outline:none;height:42px;font-size:17px;font-family:var(--mono);letter-spacing:.02em;min-width:0}
+.sbox input::placeholder{font-family:var(--font);font-size:16px;letter-spacing:0;color:var(--muted)}
+.go{border:0;background:var(--accent);color:var(--accent-ink);border-radius:11px;padding:0 22px;font-weight:600;cursor:pointer;font-size:15px}
+.go:hover{filter:brightness(1.08)}
+.recent{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;min-height:22px}
+.recent span.t{font-size:12px;color:var(--muted)}
+.pill-btn{border:1px solid var(--border);background:transparent;border-radius:99px;padding:2px 10px;font-size:12.5px;cursor:pointer;font-family:var(--mono)}
+.pill-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* states */
+.state{text-align:center;padding:36px 16px;color:var(--muted)}
+.state b{display:block;color:var(--text);font-size:18px;margin-bottom:4px}
+.state .big{font-size:40px;margin-bottom:8px}
+.state.err b{color:var(--bad)}
+.spin{width:26px;height:26px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);margin:0 auto 12px;animation:r .8s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+/* result */
+.sec{margin-top:16px}
+.sec>h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow)}
+.card+.card{margin-top:8px}
+.ev-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.ev-head h3{margin:0;font-size:17px;line-height:1.3}
+.slug{color:var(--muted);margin-top:2px}
+.st{padding:2px 10px;border-radius:99px;font-weight:600;font-size:12.5px;white-space:nowrap}
+.st.ongoing{background:var(--ok-bg);color:var(--ok)} .st.ended{background:var(--bad-bg);color:var(--bad)} .st.upcoming{background:var(--warn-bg);color:var(--warn)}
+.rel{color:var(--muted);font-size:13px;margin-top:6px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 16px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+.meta div small{display:block;color:var(--muted);font-size:12px}
+.meta div b{font-weight:500}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow)}
+.kpi small{color:var(--muted);font-size:12.5px}
+.kpi .v{font-size:24px;font-weight:700;line-height:1.2;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .v.ok{color:var(--ok)} .kpi .v.bad{color:var(--bad)}
+.kpi .sub{font-size:12.5px;color:var(--muted)}
+.prog{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.prog.w i{background:#e08a1e} .prog.f i{background:var(--bad)}
+.rw{display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center}
+.rw .nm{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.rw .bid{color:var(--muted);font-size:13px}
+.rw .nums{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rw .prog{grid-column:1/-1}
+
+/* logs */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.tools .f{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:10px;padding:0 12px;background:var(--bg)}
+.tools .f:focus-within{border-color:var(--accent)}
+.tools .f input{flex:1;border:0;background:transparent;outline:none;height:32px;min-width:0}
+.tools select{height:32px;border:1px solid var(--border);border-radius:10px;background:var(--bg);padding:0 8px}
+.cnt{color:var(--muted);font-size:13px}
+.tw{overflow:auto;border:1px solid var(--border);border-radius:12px}
+table{border-collapse:collapse;width:100%}
+th{background:var(--surface2);text-align:left;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 12px;white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0}
+th:hover{color:var(--text)}
+th .ar{opacity:.8;margin-left:4px;color:var(--accent)}
+td{padding:6px 12px;border-top:1px solid var(--border);white-space:nowrap}
+tr:hover td{background:var(--surface2)}
+td.n{color:var(--muted);width:56px;font-variant-numeric:tabular-nums}
+td.u{cursor:copy;font-weight:500}
+td.u:hover{color:var(--accent)}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.pager .btns{display:flex;gap:6px}
+.pager button{border:1px solid var(--border);background:var(--surface);border-radius:8px;height:28px;min-width:28px;padding:0 10px;cursor:pointer}
+.pager button:disabled{opacity:.4;cursor:default}
+.pager button.cur{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.empty-row{text-align:center;color:var(--muted);padding:28px}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.2s}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)!important}
+@media(max-width:640px){.brand small{display:none}.top{gap:8px}.ev-head>div:last-child{text-align:left!important}.sbox{flex-direction:column}.go{height:42px}.row2{grid-template-columns:1fr}.ev-head h3{font-size:18px}}
+.holo{border:0 !important;color:var(--accent-ink) !important;font-weight:600;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#38bdf8));
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px color-mix(in srgb,var(--accent) 35%,transparent)}
+.holo:hover{filter:brightness(1.08);box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 3px 12px color-mix(in srgb,var(--accent) 50%,transparent)}
+
+#gate{position:fixed;inset:0;z-index:1000;background:var(--bg);display:grid;place-items:center;padding:16px;overflow:auto}
+#gate[hidden]{display:none}
+.gcard{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;text-align:center}
+.gcard h2{margin:0;font-size:18px}.gico{font-size:30px;line-height:1}
+.gwarn{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:9px 12px;font-size:13px;text-align:left}.gwarn b{display:inline}
+.glbl{font-size:12px;font-weight:600;color:var(--muted);text-align:left}
+.gcard .grow{display:flex;gap:8px;align-items:center;justify-content:center;flex:none}
+.gcard canvas{border-radius:10px;border:1px solid var(--border);max-width:100%}
+#gIn{height:44px;border:2px solid var(--border);background:var(--bg);border-radius:10px;text-align:center;font:600 20px var(--mono);letter-spacing:.25em;text-transform:uppercase;outline:none;width:100%}
+#gIn:focus{border-color:var(--accent)}
+.gerr{color:var(--bad);font-size:13px;min-height:18px}
+.gbtn{border:0;background:var(--accent);color:var(--accent-ink);border-radius:10px;height:42px;font-weight:600;font-size:15px;cursor:pointer}
+.gcard small{color:var(--muted)}
+
+/* header: บรรทัดเดียว */
+.top{flex-wrap:nowrap !important;gap:10px}
+.brand{min-width:0;flex:0 1 auto}
+.brand>div{min-width:0}
+.brand small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip,.ibtn,#lastFetch{white-space:nowrap;flex:none}
+@media (max-width:900px){ #lastFetch{display:none} }
+@media (max-width:640px){ .top{gap:6px} .holo{padding:0 8px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand"><i>🎁</i><div>Itemcode Lookup<small data-i18n="brandSub">ค้นหาว่าโค้ดนี้มาจากกิจกรรมไหน และใคร Redeem ไปแล้วบ้าง</small></div></div>
+    <span class="grow"></span>
+    <span id="modeBadge" class="chip live"></span>
+    <span id="lastFetch" style="font-size:12px;white-space:nowrap;color:var(--muted)" data-i18n-title="lastFetchTitle"></span>
+    <a class="ibtn holo" href="itemcode-dashboard.html" style="text-decoration:none;color:inherit">📊 Dashboard</a>
+    <button class="ibtn" id="btnLang" title="Language / ภาษา" aria-label="Language">EN</button>
+    <button class="ibtn" id="btnTheme" data-i18n-title="theme" title="สลับโหมดสว่าง/มืด" aria-label="สลับธีม">🌓</button>
+  </header>
+
+  <section class="search">
+    <div class="lbl" id="lblGame" data-i18n="game">เกม</div>
+    <div class="games" id="games" role="radiogroup" aria-labelledby="lblGame"></div>
+    <div class="lbl">Item Code</div>
+    <div class="sbox">
+      <div class="field"><span aria-hidden="true">🔎</span><input id="code" data-i18n-ph="ph" placeholder="พิมพ์โค้ดแล้วกด Enter เช่น SUSUNAJA" autocomplete="off" spellcheck="false" aria-label="Item Code"></div>
+      <button class="go" id="go" data-i18n="search">ค้นหา</button>
+    </div>
+    <div class="recent" id="recent"></div>
+  </section>
+
+  <div id="results"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+
+<script>
+/* =========================================================
+ *  1) CONFIG
+ * ========================================================= */
+const CFG = { tz:7, n8nUrl:'https://n8n-crazysprout.exservice.io/webhook/itemcode-report', n8nHeaderName:'', n8nHeaderValue:'' };
+const lsGet=(k,d)=>{ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } };
+const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+
+/* =========================================================
+ *  2) UTILS
+ * ========================================================= */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const tzLabel = () => 'GMT' + (CFG.tz>=0?'+':'') + CFG.tz;
+const fmtDT = d => { const t=new Date(d.getTime()+CFG.tz*36e5); return `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())} ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`; }; // แปลงเวลาจริง (epoch) -> เวลาตามเขตเวลาข้อมูล
+const fmtNum = n => (n==null||n==='')?'':Number(n).toLocaleString('en-US');
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toMs = s => Date.parse(String(s).replace(' ','T')+'Z') - CFG.tz*36e5; // ข้อความเวลา (ตามเขตเวลาข้อมูล) -> epoch จริง
+function eventStatus(ev){ const now=Date.now(), s=toMs(ev.start_at), e=toMs(ev.end_at); return now<s?'upcoming':now>e?'ended':'ongoing'; }
+/* i18n */
+const I18N = {
+ th:{"gateTitle": "ยืนยันก่อนเข้าใช้งาน", "gateVpnT": "⚠ ต้องต่อ VPN Warpnet ก่อน ", "gateVpnB": "ระบบดึงข้อมูลจากเครือข่ายภายใน จะเข้าใช้งานได้ก็ต่อเมื่อเชื่อมต่อ VPN Warpnet แล้วเท่านั้น หากยังไม่ได้ต่อ ให้ต่อก่อนแล้วค่อยยืนยัน", "gateCaptcha": "พิมพ์ตัวอักษรที่เห็นในภาพ", "gateRefresh": "↻ เปลี่ยนรูป", "gateGo": "ยืนยันและเข้าใช้งาน", "gateWrong": "ตัวอักษรไม่ถูกต้อง ลองอีกครั้ง", "gateNote": "ผ่านแล้วใช้งานได้ 30 นาที จากนั้นต้องยืนยันใหม่", "gateLeft": "เหลือ", "vpnHint": "เชื่อมต่อ n8n ไม่ได้ — ตรวจสอบว่าต่อ VPN Warpnet แล้ว",brandSub:"ค้นหาว่าโค้ดนี้มาจากกิจกรรมไหน และใคร Redeem ไปแล้วบ้าง",
+  lastFetchTitle:"เวลาล่าสุดที่ดึงข้อมูลจาก n8n",
+  lastFetch:"ดึงข้อมูลล่าสุด",
+  theme:"สลับโหมดสว่าง/มืด",
+  game:"เกม",
+  ph:"พิมพ์โค้ดแล้วกด Enter เช่น SUSUNAJA",
+  search:"ค้นหา",
+  badgeN8n:"● ดึงข้อมูลจาก n8n",
+  st_ongoing:"ดำเนินการอยู่",
+  st_ended:"จบแล้ว",
+  st_upcoming:"ยังไม่เริ่ม",
+  spanD:(d,h)=>`${d} วัน ${h} ชม.`,
+  spanH:(h,m)=>`${h} ชม. ${m} นาที`,
+  spanM:m=>`${m} นาที`,
+  relUp:x=>`เริ่มในอีก ${x}`,
+  relOn:x=>`สิ้นสุดในอีก ${x}`,
+  relEnd:x=>`สิ้นสุดไปแล้ว ${x}`,
+  noGames:"ไม่พบรายชื่อเกม",
+  recent:"ค้นล่าสุด:",
+  emptyT:"พิมพ์ Item Code เพื่อเริ่มค้นหา",
+  emptyB:"เลือกเกมด้านบน แล้วใส่โค้ด ระบบจะบอกว่าโค้ดนี้เป็นของกิจกรรมไหนและใคร Redeem ไปแล้วบ้าง",
+  noGameT:"ยังไม่ได้เลือกเกม",
+  noGameB:"เลือกเกมด้านบนก่อนค้นหา",
+  searching:c=>`กำลังค้นหา “${c}”…`,
+  nfT:c=>`ไม่พบโค้ด “${c}” ในเกมนี้`,
+  nfB:"ตรวจตัวสะกด หรือลองเปลี่ยนเกมด้านบน",
+  errT:"เกิดข้อผิดพลาด",
+  evSec:"กิจกรรมที่โค้ดนี้อยู่",
+  allTimes:z=>`· เวลาทั้งหมดเป็น ${z}`,
+  mType:"ประเภทการแลก",
+  mLimit:"จำกัดต่อผู้เล่น",
+  times:"ครั้ง",
+  mStart:"เริ่ม",
+  mEnd:"สิ้นสุด",
+  mUpd:"แก้ไขล่าสุด",
+  used:"ใช้ไปแล้ว",
+  ofTotal:p=>`${p}% ของทั้งหมด`,
+  remaining:"คงเหลือ",
+  depleted:"โค้ดหมดแล้ว",
+  avail:"ยังแลกได้",
+  total:"จำนวนทั้งหมด",
+  nRewards:n=>`${n} รางวัล`,
+  rewards:"รางวัล",
+  noReward:"ไม่มีข้อมูลรางวัล",
+  left:n=>`เหลือ ${n}`,
+  usedPct:p=>`ใช้ไปแล้ว ${p}%`,
+  history:"ประวัติการ Redeem",
+  nEntries:n=>`${n} รายการ`,
+  lqPh:"ค้นหา username / เวลา ในรายการนี้",
+  lqAria:"กรองประวัติ",
+  sizeAria:"จำนวนต่อหน้า",
+  redeemedAt:z=>`เวลาที่ Redeem (${z})`,
+  clickCopy:"คลิกเพื่อคัดลอก",
+  noMatch:"ไม่พบรายการที่ตรงกับคำค้น",
+  noRedeem:"ยังไม่มีใคร Redeem โค้ดนี้",
+  showing:(a,b,n)=>`แสดง ${a}–${b} จาก ${n}`,
+  prev:"ก่อนหน้า",
+  next:"ถัดไป",
+  copied:c=>`คัดลอก ${c} แล้ว`,
+  copyFail:"คัดลอกไม่สำเร็จ",
+  noExport:"ไม่มีข้อมูลให้ส่งออก",
+  gamesFail:"โหลดรายชื่อเกมไม่สำเร็จ:",
+  noUrl:"ยังไม่ได้ใส่ n8n Webhook URL (กด ⚙ ตั้งค่า)"},
+ en:{"gateTitle": "Verify to continue", "gateVpnT": "⚠ Warpnet VPN required. ", "gateVpnB": "Data comes from the internal network and is only reachable while connected to the Warpnet VPN. If you are not connected yet, connect first, then verify.", "gateCaptcha": "Type the characters you see", "gateRefresh": "↻ New image", "gateGo": "Verify & continue", "gateWrong": "Incorrect characters. Please try again.", "gateNote": "Access lasts 30 minutes, then you will need to verify again.", "gateLeft": "left", "vpnHint": "Cannot reach n8n — make sure you are connected to the Warpnet VPN",brandSub:"Find which event a code belongs to and who has redeemed it",
+  lastFetchTitle:"Last time data was fetched from n8n",
+  lastFetch:"Last fetched",
+  theme:"Toggle light/dark mode",
+  game:"Game",
+  ph:"Type a code and press Enter, e.g. SUSUNAJA",
+  search:"Search",
+  badgeN8n:"● Data from n8n",
+  st_ongoing:"Ongoing",
+  st_ended:"Ended",
+  st_upcoming:"Upcoming",
+  spanD:(d,h)=>`${d}d ${h}h`,
+  spanH:(h,m)=>`${h}h ${m}m`,
+  spanM:m=>`${m}m`,
+  relUp:x=>`Starts in ${x}`,
+  relOn:x=>`Ends in ${x}`,
+  relEnd:x=>`Ended ${x} ago`,
+  noGames:"No games found",
+  recent:"Recent:",
+  emptyT:"Enter an Item Code to start searching",
+  emptyB:"Pick a game above and type a code — you will see which event it belongs to and who has redeemed it.",
+  noGameT:"No game selected",
+  noGameB:"Pick a game above before searching",
+  searching:c=>`Searching “${c}”…`,
+  nfT:c=>`Code “${c}” not found in this game`,
+  nfB:"Check the spelling, or try another game above",
+  errT:"Something went wrong",
+  evSec:"Event for this code",
+  allTimes:z=>`· All times in ${z}`,
+  mType:"Redeem type",
+  mLimit:"Limit per player",
+  times:"time(s)",
+  mStart:"Start",
+  mEnd:"End",
+  mUpd:"Last updated",
+  used:"Used",
+  ofTotal:p=>`${p}% of total`,
+  remaining:"Remaining",
+  depleted:"Fully redeemed",
+  avail:"Still available",
+  total:"Total",
+  nRewards:n=>`${n} reward(s)`,
+  rewards:"Rewards",
+  noReward:"No reward data",
+  left:n=>`${n} left`,
+  usedPct:p=>`${p}% used`,
+  history:"Redeem history",
+  nEntries:n=>`${n} entries`,
+  lqPh:"Search username / time in this list",
+  lqAria:"Filter history",
+  sizeAria:"Rows per page",
+  redeemedAt:z=>`Redeemed at (${z})`,
+  clickCopy:"Click to copy",
+  noMatch:"No entries match your search",
+  noRedeem:"No one has redeemed this code yet",
+  showing:(a,b,n)=>`Showing ${a}–${b} of ${n}`,
+  prev:"Previous",
+  next:"Next",
+  copied:c=>`Copied ${c}`,
+  copyFail:"Copy failed",
+  noExport:"Nothing to export",
+  gamesFail:"Failed to load games:",
+  noUrl:"n8n Webhook URL is not set (press ⚙ Settings)"}
+};
+let LANG='th'; try{ const l=localStorage.getItem('itemcode_lang'); if(l==='en'||l==='th') LANG=l; }catch(e){}
+const t=(k,...a)=>{ const v=(I18N[LANG][k] ?? I18N.th[k] ?? k); return typeof v==='function'?v(...a):v; };
+function setLabel(el,txt){ if(!el.children.length){ el.textContent=txt; return; } for(const n of el.childNodes){ if(n.nodeType===3 && n.nodeValue.trim()){ n.nodeValue=txt+' '; return; } } }
+function showLast(){ $('#lastFetch').textContent = S.lastFetch ? t('lastFetch')+' '+S.lastFetch : ''; }
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>setLabel(el,t(el.dataset.i18n)));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>el.title=t(el.dataset.i18nTitle));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  $('#btnLang').textContent = LANG==='th'?'EN':'ไทย'; try{ Gate.relabel(); }catch(e){}
+  updateBadge(); showLast();
+}
+function span(ms){ ms=Math.abs(ms); const m=Math.floor(ms/6e4), h=Math.floor(m/60), d=Math.floor(h/24);
+  return d>=1 ? t('spanD',d,h%24) : h>=1 ? t('spanH',h,m%60) : t('spanM',m); }
+function relText(ev){ const st=eventStatus(ev), now=Date.now();
+  return st==='upcoming' ? t('relUp',span(toMs(ev.start_at)-now)) : st==='ongoing' ? t('relOn',span(toMs(ev.end_at)-now)) : t('relEnd',span(now-toMs(ev.end_at))); }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),1600); }
+
+/* =========================================================
+ *  3) DATA SOURCES  (n8n)
+ *     ทุกแหล่งคืนรูปแบบเดียวกัน:
+ *       getGames()           -> [{id,name}]
+ *       search(gameId, code) -> {events:[], reward:[], logs:[]}
+ * ========================================================= */
+/* เกมที่ DB เก็บเวลาเป็น UTC → บวก 7 ชม. ให้แสดงเป็น GMT+7 (เกมอื่นเก็บเป็น GMT+7 อยู่แล้ว) — เพิ่มเกมใหม่ใส่ id ที่นี่ */
+const UTC_GAMES = new Set(['a222e2ae-2b88-47bb-a39d-789ba38ccf94','ece25107-ec4f-4c83-9f2b-38afd0e77cc2','f1a18842-e3c0-42e7-b7b1-56f80d95d0bc']);
+const shiftTs = (s, h) => { if(typeof s!=='string' || !/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/.test(s)) return s; const d=new Date(Date.parse(s.slice(0,19).replace(' ','T')+'Z')+h*36e5), p=n=>String(n).padStart(2,'0'); return `${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`; };
+const N8nSource = {
+  async call(payload){
+    if(!CFG.n8nUrl) throw new Error(t('noUrl'));
+    const headers = {'Content-Type':'application/json'};
+    if(CFG.n8nHeaderName) headers[CFG.n8nHeaderName] = CFG.n8nHeaderValue;
+    const res = await fetch(CFG.n8nUrl, {method:'POST', headers, body:JSON.stringify(payload)});
+    if(!res.ok) throw new Error(`n8n ${res.status}: ${(await res.text()).slice(0,300)}`);
+    let j = await res.json();
+    if(Array.isArray(j) && j.length===1 && j[0] && !Array.isArray(j[0]) && ('events' in j[0] || 'games' in j[0])) j = j[0]; // n8n มักห่อเป็น array
+    return j;
+  },
+  async getGames(){ const j = await this.call({action:'games'}); const a = Array.isArray(j) ? j : (j.games||[]); return a.map(r=>({id:r.id, name:r.name})); },
+  async search(gameId, code){
+    const j = await this.call({action:'search', game_id:gameId, code:code.trim()});
+    const fixEv = e => { const {id,_id,name,...r} = e; return {...r, NAME: e.NAME ?? name}; };
+    const u = UTC_GAMES.has(gameId), sh = v => u ? shiftTs(v, 7) : v;
+    const ev = (j.events||[]).map(fixEv).map(e => ({...e, start_at:sh(e.start_at), end_at:sh(e.end_at), updated_at:sh(e.updated_at)}));
+    const logs = (j.logs||[]).map(l => ({...l, created_at:sh(l.created_at)}));
+    return { events:ev, reward:j.reward||[], logs };
+  }
+};
+const src = () => N8nSource;
+
+/* =========================================================
+ *  4) UI
+ * ========================================================= */
+const S = { game:'', code:'', data:null, q:'', sort:{k:'created_at',dir:-1}, page:1, size:25, seq:0 };
+const elCode=$('#code'), elRes=$('#results');
+
+/* theme */
+function applyTheme(t){ if(t) document.documentElement.setAttribute('data-theme',t); else document.documentElement.removeAttribute('data-theme'); }
+applyTheme(lsGet('itemcode_theme',null));
+$('#btnTheme').onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  const nx=cur==='dark'?'light':'dark'; applyTheme(nx); lsSet('itemcode_theme',nx);
+};
+
+function updateBadge(){ $('#modeBadge').textContent=t('badgeN8n'); }
+
+/* games */
+function renderGames(games){
+  $('#games').innerHTML = games.map(g=>`<button class="game" role="radio" aria-checked="${g.id===S.game}" data-id="${esc(g.id)}">${esc(g.name)}</button>`).join('') || '<span class="cnt">'+t('noGames')+'</span>';
+}
+$('#games').addEventListener('click',e=>{ const b=e.target.closest('.game'); if(!b) return; S.game=b.dataset.id; lsSet('itemcode_game',S.game);
+  document.querySelectorAll('.game').forEach(x=>x.setAttribute('aria-checked',x===b)); run(); });
+
+/* recent */
+function renderRecent(){
+  const r=lsGet('itemcode_recent',[]);
+  $('#recent').innerHTML = r.length ? `<span class="t">${t('recent')}</span>`+r.map(c=>`<button class="pill-btn" data-c="${esc(c)}">${esc(c)}</button>`).join('') : '';
+}
+$('#recent').addEventListener('click',e=>{ const b=e.target.closest('[data-c]'); if(b){ elCode.value=b.dataset.c; run(); } });
+function pushRecent(c){ let r=lsGet('itemcode_recent',[]).filter(x=>x.toLowerCase()!==c.toLowerCase()); r.unshift(c); lsSet('itemcode_recent',r.slice(0,6)); renderRecent(); }
+
+/* search */
+async function run(){
+  const code=elCode.value.trim(), my=++S.seq; S.code=code; syncUrl();
+  if(!code){ S.data=null; elRes.innerHTML=`<div class="state"><div class="big">🔎</div><b>${t('emptyT')}</b>${t('emptyB')}</div>`; return; }
+  if(!S.game){ elRes.innerHTML=`<div class="state err"><b>${t('noGameT')}</b>${t('noGameB')}</div>`; return; }
+  elRes.innerHTML=`<div class="state"><div class="spin"></div>${t('searching',esc(code))}</div>`;
+  try{
+    const d=await src().search(S.game, code); if(my!==S.seq) return;
+    S.lastFetch=fmtDT(new Date()); showLast(); S.data=d; S.q=''; S.page=1; S.sort={k:'created_at',dir:-1};
+    if(!d.events.length){ elRes.innerHTML=`<div class="state"><div class="big">🤷</div><b>${t('nfT',esc(code))}</b>${t('nfB')}</div>`; return; }
+    pushRecent(code); renderResult();
+  }catch(e){ if(my===S.seq) elRes.innerHTML=`<div class="state err"><div class="big">⚠️</div><b>${t('errT')}</b>${esc(errText(e))}</div>`; }
+}
+function syncUrl(){ try{ const p=new URLSearchParams(); if(S.game)p.set('game',S.game); if(S.code)p.set('code',S.code); history.replaceState(null,'','?'+p); }catch(e){} }
+
+function renderResult(){
+  const {events,reward,logs}=S.data;
+  const sum = k => reward.reduce((a,r)=>a+(+r[k]||0),0);
+  const total=sum('total'), used=sum('used'), remain=reward.length?sum('remaining'):0, pct=total?Math.round(used/total*100):0;
+  const evCards = events.map(ev=>{ const st=eventStatus(ev); return `
+    <article class="card">
+      <div class="ev-head">
+        <div><h3>${esc(ev.NAME)}</h3><div class="slug mono">${esc(ev.slug)}</div></div>
+        <div style="text-align:right"><span class="st ${st}">${t('st_'+st)}</span><div class="rel">${esc(relText(ev))}</div></div>
+      </div>
+      <div class="meta">
+        <div><small>${t('mType')}</small><b>${esc(ev.redeem_type)}</b></div>
+        <div><small>${t('mLimit')}</small><b>${esc(ev.per_player_limit)} ${t('times')}</b></div>
+        <div><small>${t('mStart')}</small><b class="mono">${esc(ev.start_at)}</b></div>
+        <div><small>${t('mEnd')}</small><b class="mono">${esc(ev.end_at)}</b></div>
+        <div><small>${t('mUpd')}</small><b class="mono">${esc(ev.updated_at)}</b></div>
+      </div>
+    </article>`; }).join('');
+  const rwCards = reward.map(r=>{ const p=r.total?Math.round(r.used/r.total*100):0; const cls=p>=100?'f':p>=80?'w':'';
+    return `<article class="card rw"><div><div class="nm">${esc(r.name)}</div><div class="bid">bundle_id <span class="mono">${esc(r.bundle_id)}</span></div></div>
+      <div class="nums"><b>${fmtNum(r.used)}</b> / ${fmtNum(r.total)}<div class="bid">${t('left',fmtNum(r.remaining))}</div></div>
+      <div class="prog ${cls}" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100" aria-label="${t('usedPct',p)}"><i style="width:${Math.min(p,100)}%"></i></div></article>`; }).join('');
+
+  elRes.innerHTML = `
+    <div class="sec"><h2>${t('evSec')} <span class="cnt" style="text-transform:none;letter-spacing:0">${t('allTimes',tzLabel())}</span></h2>${evCards}</div>
+    <div class="sec"><div class="kpis">
+      <div class="kpi"><small>${t('used')}</small><div class="v">${fmtNum(used)}</div><div class="sub">${t('ofTotal',pct)}</div></div>
+      <div class="kpi"><small>${t('remaining')}</small><div class="v ${remain<=0?'bad':'ok'}">${fmtNum(remain)}</div><div class="sub">${remain<=0?t('depleted'):t('avail')}</div></div>
+      <div class="kpi"><small>${t('total')}</small><div class="v">${fmtNum(total)}</div><div class="sub">${t('nRewards',reward.length)}</div></div>
+    </div></div>
+    <div class="sec"><h2>${t('rewards')}</h2>${rwCards||'<div class="card cnt">'+t('noReward')+'</div>'}</div>
+    <div class="sec"><h2>${t('history')} <span class="cnt">${t('nEntries',fmtNum(logs.length))}</span></h2>
+      <div class="card">
+        <div class="tools">
+          <label class="f"><span aria-hidden="true">⌕</span><input id="lq" placeholder="${t('lqPh')}" aria-label="${t('lqAria')}"></label>
+          <select id="lsize" aria-label="${t('sizeAria')}"><option>25</option><option>50</option><option>100</option><option>500</option></select>
+          <button class="ibtn" id="btnCsv">⬇ CSV</button>
+        </div>
+        <div id="logsBox"></div>
+      </div>
+    </div>`;
+  $('#lq').oninput=e=>{ S.q=e.target.value; S.page=1; renderLogs(); };
+  $('#lsize').onchange=e=>{ S.size=+e.target.value; S.page=1; renderLogs(); };
+  $('#lsize').value=S.size;
+  $('#btnCsv').onclick=exportCsv;
+  renderLogs();
+}
+
+function logsView(){
+  let rows=S.data.logs; const q=S.q.trim().toLowerCase();
+  if(q) rows=rows.filter(r=>`${r.username} ${r.code} ${r.created_at}`.toLowerCase().includes(q));
+  const {k,dir}=S.sort;
+  return [...rows].sort((a,b)=>String(a[k]??'').localeCompare(String(b[k]??''),undefined,{numeric:true})*dir);
+}
+function renderLogs(){
+  const rows=logsView(), size=S.size, pages=Math.max(1,Math.ceil(rows.length/size)); S.page=Math.min(S.page,pages);
+  const from=(S.page-1)*size, slice=rows.slice(from,from+size);
+  const th=(k,l)=>`<th data-s="${k}">${l}${S.sort.k===k?`<span class="ar">${S.sort.dir>0?'↑':'↓'}</span>`:''}</th>`;
+  $('#logsBox').innerHTML=`
+    <div class="tw"><table><thead><tr><th>#</th>${th('username','Username')}${th('code','Code')}${th('created_at',t('redeemedAt',tzLabel()))}</tr></thead>
+    <tbody>${slice.length?slice.map((r,i)=>`<tr><td class="n">${from+i+1}</td><td class="u" data-copy="${esc(r.username)}" title="${t('clickCopy')}">${esc(r.username)}</td><td class="mono">${esc(r.code)}</td><td class="mono">${esc(r.created_at)}</td></tr>`).join('')
+      : `<tr><td colspan="4" class="empty-row">${S.data.logs.length?t('noMatch'):t('noRedeem')}</td></tr>`}</tbody></table></div>
+    <div class="pager"><span class="cnt">${rows.length?`${t('showing',from+1,Math.min(rows.length,from+size),fmtNum(rows.length))}`:''}</span>
+      <div class="btns"><button data-p="${S.page-1}" ${S.page<=1?'disabled':''} aria-label="${t('prev')}">‹</button>${pageNums(S.page,pages).map(n=>n==='…'?'<span class="cnt">…</span>':`<button data-p="${n}" class="${n===S.page?'cur':''}">${n}</button>`).join('')}<button data-p="${S.page+1}" ${S.page>=pages?'disabled':''} aria-label="${t('next')}">›</button></div></div>`;
+}
+function pageNums(cur,total){ if(total<=7) return [...Array(total)].map((_,i)=>i+1); const s=new Set([1,2,cur-1,cur,cur+1,total-1,total]); const a=[...s].filter(n=>n>=1&&n<=total).sort((x,y)=>x-y); const o=[]; a.forEach((n,i)=>{ if(i&&n-a[i-1]>1) o.push('…'); o.push(n); }); return o; }
+
+elRes.addEventListener('click',e=>{
+  const th=e.target.closest('th[data-s]'); if(th){ const k=th.dataset.s; S.sort={k, dir:S.sort.k===k?-S.sort.dir:1}; S.page=1; renderLogs(); return; }
+  const pb=e.target.closest('.pager button[data-p]'); if(pb){ S.page=+pb.dataset.p; renderLogs(); return; }
+  const c=e.target.closest('[data-copy]'); if(c){ try{ navigator.clipboard.writeText(c.dataset.copy).then(()=>toast(t('copied',c.dataset.copy)),()=>toast(t('copyFail'))); }catch(_){ toast(t('copyFail')); } }
+});
+function exportCsv(){
+  const rows=logsView(); if(!rows.length){ toast(t('noExport')); return; }
+  const csv=['username,code,created_at',...rows.map(r=>[r.username,r.code,r.created_at].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`redeem-logs-${S.code||'export'}.csv`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* inputs */
+let deb; elCode.addEventListener('input',()=>{ clearTimeout(deb); deb=setTimeout(run,600); });
+elCode.addEventListener('keydown',e=>{ if(e.key==='Enter'){ clearTimeout(deb); run(); } });
+$('#go').onclick=()=>{ clearTimeout(deb); run(); };
+
+/* games loading */
+async function loadGames(){
+  try{
+    const games=await src().getGames(), p=new URLSearchParams(location.search);
+    const want=p.get('game')||lsGet('itemcode_game','');
+    S.game = games.some(g=>g.id===want) ? want : (games[0]?.id||'');
+    renderGames(games);
+  }catch(e){ $('#games').innerHTML=`<span class="cnt" style="color:var(--bad)">${t('gamesFail')} ${esc(errText(e))}</span>`; }
+}
+
+$('#btnLang').onclick=()=>{ LANG=LANG==='th'?'en':'th'; try{ localStorage.setItem('itemcode_lang',LANG); }catch(e){} applyLang(); renderRecent(); if(S.data&&S.data.events.length){ S.q=''; renderResult(); } else run(); };
+
+/* ───────── Gate: CAPTCHA + แจ้งเตือน VPN Warpnet (ผ่านแล้วใช้ได้ 30 นาที) ───────── */
+const errText = e => /failed to fetch|networkerror|load failed|network request/i.test(String(e&&e.message)) ? t('vpnHint')+' ('+e.message+')' : (e&&e.message||String(e));
+const Gate = (() => {
+  const KEY='itemcode_gate_until', TTL=30*60*1000;
+  let mem=0, ans='', el=null, waiters=[], tick=null;
+  const getUntil=()=>{ let v=0; try{ v=+localStorage.getItem(KEY)||0; }catch(e){} return Math.max(v,mem); };
+  const setUntil=v=>{ mem=v; try{ localStorage.setItem(KEY,String(v)); }catch(e){} };
+  const valid=()=>getUntil()>Date.now();
+  const rnd=n=>crypto.getRandomValues(new Uint32Array(1))[0]%n;
+  function draw(){
+    const c=el.querySelector('canvas'), x=c.getContext('2d'), W=c.width, H=c.height, CH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    ans=''; for(let i=0;i<5;i++) ans+=CH[rnd(CH.length)];
+    x.fillStyle='#f3f1ec'; x.fillRect(0,0,W,H);
+    for(let i=0;i<7;i++){ x.strokeStyle=`hsl(${rnd(360)} 45% 60% / .7)`; x.lineWidth=1+rnd(2); x.beginPath(); x.moveTo(rnd(W),rnd(H)); x.bezierCurveTo(rnd(W),rnd(H),rnd(W),rnd(H),rnd(W),rnd(H)); x.stroke(); }
+    for(let i=0;i<5;i++){ x.save(); x.translate(16+i*(W-28)/5+rnd(6), H/2+rnd(8)-2); x.rotate((rnd(50)-25)*Math.PI/180); x.font=`700 ${30+rnd(8)}px "JetBrains Mono",monospace`; x.fillStyle=`hsl(${rnd(360)} 55% 28%)`; x.textBaseline='middle'; x.fillText(ans[i],0,0); x.restore(); }
+    for(let i=0;i<70;i++){ x.fillStyle=`hsl(${rnd(360)} 40% 40% / .5)`; x.fillRect(rnd(W),rnd(H),2,2); }
+  }
+  function build(){
+    el=document.createElement('div'); el.id='gate'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.hidden=true;
+    el.innerHTML=`<form class="gcard" autocomplete="off">
+      <div class="gico">🛡️</div><h2 id="gTitle"></h2>
+      <div class="gwarn"><b id="gVpnT"></b><span id="gVpnB"></span></div>
+      <label class="glbl" id="gCap" for="gIn"></label>
+      <div class="grow"><canvas width="190" height="64" aria-hidden="true"></canvas><button type="button" class="ibtn" id="gRef"></button></div>
+      <input id="gIn" maxlength="8" autocapitalize="characters" spellcheck="false">
+      <div class="gerr" id="gErr" role="alert"></div>
+      <button class="gbtn" type="submit" id="gGo"></button>
+      <small id="gNote"></small></form>`;
+    document.body.appendChild(el);
+    el.querySelector('#gRef').onclick=()=>{ draw(); el.querySelector('#gIn').focus(); };
+    el.querySelector('form').onsubmit=ev=>{ ev.preventDefault(); const inp=el.querySelector('#gIn');
+      if(inp.value.trim().toUpperCase()===ans){ setUntil(Date.now()+TTL); el.hidden=true; document.body.style.overflow=''; inp.value=''; el.querySelector('#gErr').textContent=''; const w=waiters; waiters=[]; w.forEach(f=>f()); tickNow(); }
+      else { el.querySelector('#gErr').textContent=t('gateWrong'); inp.value=''; draw(); inp.focus(); } };
+  }
+  function texts(){
+    const s=(i,k)=>el.querySelector('#'+i).textContent=t(k);
+    s('gTitle','gateTitle'); s('gVpnT','gateVpnT'); s('gVpnB','gateVpnB'); s('gCap','gateCaptcha'); s('gRef','gateRefresh'); s('gGo','gateGo'); s('gNote','gateNote');
+  }
+  function show(){ if(!el) build(); if(!el.hidden) return; texts(); el.hidden=false; document.body.style.overflow='hidden'; draw(); setTimeout(()=>el.querySelector('#gIn').focus(),50); }
+  function tickNow(){
+    const chip=document.querySelector('#gateLeft'); const left=getUntil()-Date.now();
+    if(left<=0){ if(chip) chip.textContent=''; show(); return; }
+    if(chip){ const m=Math.floor(left/6e4), sec=Math.floor(left/1e3)%60; chip.textContent=`⏱ ${t('gateLeft')} ${m}:${String(sec).padStart(2,'0')}`; }
+  }
+  return {
+    start(){
+      clearInterval(tick); tick=setInterval(tickNow,1000); },
+    require(){ return new Promise(res=>{ if(valid()){ tickNow(); res(); } else { waiters.push(res); show(); } }); },
+    relabel(){ if(el&&!el.hidden) texts(); tickNow(); }
+  };
+})();
+
+/* init */
+(async function(){
+  applyLang(); Gate.start(); await Gate.require(); renderRecent(); await loadGames();
+  const p=new URLSearchParams(location.search);
+  elCode.value = p.get('code') || '';
+  run();
+})();
+</script>
+</body>
+</html>

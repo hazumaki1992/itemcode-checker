@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Itemcode Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"></noscript>
+<style>
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --surface2:#f1efea; --border:#e4e1da; --text:#1d1b17; --muted:#6b675e;
+  --accent:#4f46e5; --accent-ink:#ffffff;
+  --ok:#15803d; --ok-bg:#e3f4e7; --warn:#b45309; --warn-bg:#fdeed6; --bad:#b91c1c; --bad-bg:#fbe4e4; --info:#1d4ed8; --info-bg:#e1eafd;
+  --shadow:0 1px 2px rgba(30,25,15,.05),0 4px 14px rgba(30,25,15,.05);
+  --font:"IBM Plex Sans Thai","Noto Sans Thai","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#13141a; --surface:#1b1d25; --surface2:#242731; --border:#2d303b; --text:#ecebe7; --muted:#9a9ca6;
+    --accent:#8f8bff; --accent-ink:#13141a;
+    --ok:#6fd08a; --ok-bg:#16301f; --warn:#f0b266; --warn-bg:#3a2b12; --bad:#ff8c8c; --bad-bg:#3a1b1d; --info:#8fb0ff; --info-bg:#1a2442; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13141a; --surface:#1b1d25; --surface2:#242731; --border:#2d303b; --text:#ecebe7; --muted:#9a9ca6;
+  --accent:#8f8bff; --accent-ink:#13141a;
+  --ok:#6fd08a; --ok-bg:#16301f; --warn:#f0b266; --warn-bg:#3a2b12; --bad:#ff8c8c; --bad-bg:#3a1b1d; --info:#8fb0ff; --info-bg:#1a2442; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:9px;height:32px;padding:0 8px;color-scheme:light dark}
+:root[data-theme="dark"] select{color-scheme:dark}:root[data-theme="light"] select{color-scheme:light}
+select option{background:var(--surface);color:var(--text)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 36px}
+.mono{font-family:var(--mono);font-size:.92em}
+.top{display:flex;align-items:center;gap:10px;padding:12px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+.brand i{width:26px;height:26px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-style:normal;font-size:15px}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:-2px}
+.grow{flex:1}
+.chip{font-size:12px;padding:3px 10px;border-radius:99px;font-weight:600;white-space:nowrap}
+.chip.live{background:var(--ok-bg);color:var(--ok)}
+.ibtn{border:1px solid var(--border);background:var(--surface);border-radius:9px;height:32px;padding:0 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;color:inherit}
+.ibtn:hover{border-color:var(--accent)}
+.ibtn:focus-visible,.game:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.games{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.game{border:1px solid var(--border);background:var(--surface2);border-radius:99px;padding:3px 11px;cursor:pointer;font-size:13px}
+.game:hover{border-color:var(--accent)}
+.game[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.filters label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+.filters input,.filters select{height:34px;border:1px solid var(--border);background:var(--bg);border-radius:9px;padding:0 10px;font-weight:400;min-width:0}
+.filters .wide{grid-column:span 2}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.quick .ibtn{height:26px;font-size:12px;padding:0 9px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 12px}
+.kpi small{color:var(--muted);font-weight:600;font-size:12px}
+.kpi .v{font-size:22px;font-weight:700;line-height:1.2}
+.kpi .sub{font-size:12px;color:var(--muted)}
+.tools{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.cnt{color:var(--muted);font-size:12px}
+.tw{overflow:auto;border:1px solid var(--border);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:860px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+th{background:var(--surface2);font-size:12px;color:var(--muted);cursor:pointer;user-select:none;position:sticky;top:0}
+th:hover{color:var(--text)}
+th.r,td.r{text-align:right}
+th .ar{margin-left:4px;color:var(--accent)}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface2)}
+td.name{white-space:normal;min-width:220px}
+td.name b{font-weight:600}
+.slug{color:var(--muted);font-size:12px}
+.st{font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px}
+.st.ongoing{background:var(--ok-bg);color:var(--ok)} .st.ended{background:var(--surface2);color:var(--muted)} .st.upcoming{background:var(--info-bg);color:var(--info)}
+.bar{height:6px;background:var(--surface2);border-radius:9px;overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar.full i{background:var(--bad)}
+.rem0{color:var(--bad);font-weight:600}
+.pager{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px;flex-wrap:wrap}
+.pager .btns{display:flex;gap:4px}
+.pager button{border:1px solid var(--border);background:var(--surface);border-radius:7px;min-width:30px;height:28px;cursor:pointer}
+.pager button.cur{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pager button:disabled{opacity:.4;cursor:default}
+.state{text-align:center;color:var(--muted);padding:34px 10px}
+.state.err{color:var(--bad)}
+.spin{width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;margin:0 auto 8px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:7px 14px;border-radius:9px;opacity:0;pointer-events:none;transition:.2s}
+.toast.on{opacity:1}
+@media (max-width:640px){ .brand small{display:none} .filters .wide{grid-column:span 1} }
+.holo{border:0 !important;color:var(--accent-ink) !important;font-weight:600;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#38bdf8));
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px color-mix(in srgb,var(--accent) 35%,transparent)}
+.holo:hover{filter:brightness(1.08);box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 3px 12px color-mix(in srgb,var(--accent) 50%,transparent)}
+
+#gate{position:fixed;inset:0;z-index:1000;background:var(--bg);display:grid;place-items:center;padding:16px;overflow:auto}
+#gate[hidden]{display:none}
+.gcard{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;text-align:center}
+.gcard h2{margin:0;font-size:18px}.gico{font-size:30px;line-height:1}
+.gwarn{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:9px 12px;font-size:13px;text-align:left}.gwarn b{display:inline}
+.glbl{font-size:12px;font-weight:600;color:var(--muted);text-align:left}
+.gcard .grow{display:flex;gap:8px;align-items:center;justify-content:center;flex:none}
+.gcard canvas{border-radius:10px;border:1px solid var(--border);max-width:100%}
+#gIn{height:44px;border:2px solid var(--border);background:var(--bg);border-radius:10px;text-align:center;font:600 20px var(--mono);letter-spacing:.25em;text-transform:uppercase;outline:none;width:100%}
+#gIn:focus{border-color:var(--accent)}
+.gerr{color:var(--bad);font-size:13px;min-height:18px}
+.gbtn{border:0;background:var(--accent);color:var(--accent-ink);border-radius:10px;height:42px;font-weight:600;font-size:15px;cursor:pointer}
+.gcard small{color:var(--muted)}
+
+/* header: บรรทัดเดียว */
+.top{flex-wrap:nowrap !important;gap:10px}
+.brand{min-width:0;flex:0 1 auto}
+.brand>div{min-width:0}
+.brand small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip,.ibtn,#lastFetch{white-space:nowrap;flex:none}
+@media (max-width:900px){ #lastFetch{display:none} }
+@media (max-width:640px){ .top{gap:6px} .holo{padding:0 8px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i>📊</i><div>Itemcode Dashboard<small data-i18n="sub"></small></div></div>
+    <span class="grow"></span>
+    <span id="modeBadge" class="chip live"></span>
+    <span id="lastFetch" style="font-size:12px;white-space:nowrap;color:var(--muted)"></span>
+    <a class="ibtn holo" id="lnkSearch" href="itemcode-report.html" data-i18n="lnkSearch"></a>
+    <button class="ibtn" id="btnLang" aria-label="Language">EN</button>
+    <button class="ibtn" id="btnTheme" aria-label="Theme">🌓</button>
+  </header>
+
+  <section class="card">
+    <div class="lbl" id="lblGame" data-i18n="game"></div>
+    <div class="games" id="games" role="radiogroup" aria-labelledby="lblGame"></div>
+    <div class="filters">
+      <label><span data-i18n="from"></span><input type="date" id="fFrom"></label>
+      <label><span data-i18n="to"></span><input type="date" id="fTo"></label>
+      <label class="wide"><span data-i18n="name"></span><input type="search" id="fName" data-i18n-ph="namePh" autocomplete="off"></label>
+      <label><span data-i18n="status"></span>
+        <select id="fStatus"><option value="" data-i18n="all"></option><option value="ongoing" data-i18n="st_ongoing"></option><option value="upcoming" data-i18n="st_upcoming"></option><option value="ended" data-i18n="st_ended"></option></select></label>
+      <label><span data-i18n="remFilter"></span>
+        <select id="fRem"><option value="" data-i18n="all"></option><option value="has" data-i18n="remHas"></option><option value="zero" data-i18n="remZero"></option></select></label>
+    </div>
+    <div class="quick">
+      <span class="cnt" data-i18n="quick"></span>
+      <button class="ibtn" data-q="7">7 <span data-i18n="days"></span></button>
+      <button class="ibtn" data-q="30">30 <span data-i18n="days"></span></button>
+      <button class="ibtn" data-q="90">90 <span data-i18n="days"></span></button>
+      <button class="ibtn" id="btnReset" data-i18n="reset"></button>
+    </div>
+  </section>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="card">
+    <div class="tools">
+      <b id="cntText"></b>
+      <span class="grow"></span>
+      <select id="fSize" aria-label="Rows per page"><option>25</option><option>50</option><option>100</option><option>500</option></select>
+      <button class="ibtn" id="btnCsv">⬇ CSV</button>
+    </div>
+    <div id="tbl"></div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ───────── ตั้งค่า ───────── */
+// ใส่ Production URL ของ workflow "Itemcode Dashboard - API" ที่นี่ (ถ้าเว้นว่าง = ใช้ข้อมูลสมมติ)
+const DASH_URL = 'https://n8n-crazysprout.exservice.io/webhook/itemcode-dashboard';
+const TZ = 7;   // เวลาในฐานข้อมูลเป็น GMT+7
+
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtNum = n => (n==null||n==='')?'':Number(n).toLocaleString('en-US');
+const lsGet=(k,d)=>{ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } };
+const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+
+/* ───────── i18n ───────── */
+const I18N = {
+ th:{"gateTitle": "ยืนยันก่อนเข้าใช้งาน", "gateVpnT": "⚠ ต้องต่อ VPN Warpnet ก่อน ", "gateVpnB": "ระบบดึงข้อมูลจากเครือข่ายภายใน จะเข้าใช้งานได้ก็ต่อเมื่อเชื่อมต่อ VPN Warpnet แล้วเท่านั้น หากยังไม่ได้ต่อ ให้ต่อก่อนแล้วค่อยยืนยัน", "gateCaptcha": "พิมพ์ตัวอักษรที่เห็นในภาพ", "gateRefresh": "↻ เปลี่ยนรูป", "gateGo": "ยืนยันและเข้าใช้งาน", "gateWrong": "ตัวอักษรไม่ถูกต้อง ลองอีกครั้ง", "gateNote": "ผ่านแล้วใช้งานได้ 30 นาที จากนั้นต้องยืนยันใหม่", "gateLeft": "เหลือ", "vpnHint": "เชื่อมต่อ n8n ไม่ได้ — ตรวจสอบว่าต่อ VPN Warpnet แล้ว", sub:'ภาพรวมกิจกรรมและจำนวนโค้ดที่ใช้ไป', lnkSearch:'🔎 ค้นหาโค้ด', game:'เกม', from:'เริ่ม/จบ ตั้งแต่วันที่', to:'ถึงวันที่', name:'ชื่อโค้ด / กิจกรรม', namePh:'พิมพ์ชื่อหรือ slug เช่น susunaja',
+  status:'สถานะ', all:'ทั้งหมด', st_ongoing:'ดำเนินการอยู่', st_ended:'จบแล้ว', st_upcoming:'ยังไม่เริ่ม', remFilter:'คงเหลือ', remHas:'ยังมีเหลือ', remZero:'หมดแล้ว',
+  quick:'ช่วงเวลาด่วน:', days:'วัน', allTime:'ทั้งหมด', reset:'ล้างตัวกรอง', lastFetch:'ดึงข้อมูลล่าสุด', badgeLive:'● ดึงข้อมูลจาก n8n',
+  kEvents:'กิจกรรม', kUsed:'ใช้ไปแล้ว', kRem:'คงเหลือ', kTotal:'จำนวนทั้งหมด', ofTotal:p=>`${p}% ของทั้งหมด`, nShown:(a,b)=>`แสดง ${a} จาก ${b} กิจกรรม`,
+  cName:'ชื่อโค้ด / กิจกรรม', cStart:'วันที่เริ่ม', cEnd:'วันที่จบ', cStatus:'สถานะ', cUsed:'Used', cRem:'Remaining', cTotal:'Total', cPct:'ใช้ไป',
+  loading:'กำลังโหลดข้อมูล…', updating:'กำลังอัปเดต…', empty:'ไม่พบกิจกรรมที่ตรงกับตัวกรอง', errT:'เกิดข้อผิดพลาด', showing:(a,b,n)=>`แสดง ${a}–${b} จาก ${n}`, prev:'ก่อนหน้า', next:'ถัดไป',
+  noExport:'ไม่มีข้อมูลให้ส่งออก', noGames:'ไม่พบรายชื่อเกม', truncated:'ผลลัพธ์ถูกจำกัดที่ 1,000 กิจกรรม — ลองแคบช่วงวันที่ลง' },
+ en:{"gateTitle": "Verify to continue", "gateVpnT": "⚠ Warpnet VPN required. ", "gateVpnB": "Data comes from the internal network and is only reachable while connected to the Warpnet VPN. If you are not connected yet, connect first, then verify.", "gateCaptcha": "Type the characters you see", "gateRefresh": "↻ New image", "gateGo": "Verify & continue", "gateWrong": "Incorrect characters. Please try again.", "gateNote": "Access lasts 30 minutes, then you will need to verify again.", "gateLeft": "left", "vpnHint": "Cannot reach n8n — make sure you are connected to the Warpnet VPN", sub:'Events overview and redeemed code counts', lnkSearch:'🔎 Code lookup', game:'Game', from:'Start/end from', to:'To date', name:'Code / event name', namePh:'Type a name or slug, e.g. susunaja',
+  status:'Status', all:'All', st_ongoing:'Ongoing', st_ended:'Ended', st_upcoming:'Upcoming', remFilter:'Remaining', remHas:'Has remaining', remZero:'Depleted',
+  quick:'Quick range:', days:'days', allTime:'All time', reset:'Clear filters', lastFetch:'Last fetched', badgeLive:'● Data from n8n',
+  kEvents:'Events', kUsed:'Used', kRem:'Remaining', kTotal:'Total', ofTotal:p=>`${p}% of total`, nShown:(a,b)=>`Showing ${a} of ${b} events`,
+  cName:'Code / event', cStart:'Start', cEnd:'End', cStatus:'Status', cUsed:'Used', cRem:'Remaining', cTotal:'Total', cPct:'Used %',
+  loading:'Loading…', updating:'Updating…', empty:'No events match the filters', errT:'Something went wrong', showing:(a,b,n)=>`Showing ${a}–${b} of ${n}`, prev:'Previous', next:'Next',
+  noExport:'Nothing to export', noGames:'No games found', truncated:'Results are capped at 1,000 events — narrow the date range' }
+};
+let LANG = lsGet('itemcode_lang','th'); if(LANG!=='en'&&LANG!=='th') LANG='th';
+const t=(k,...a)=>{ const v=I18N[LANG][k] ?? I18N.th[k] ?? k; return typeof v==='function'?v(...a):v; };
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  $('#btnLang').textContent = LANG==='th'?'EN':'ไทย'; try{ Gate.relabel(); }catch(e){}
+  $('#modeBadge').textContent = t('badgeLive');
+  showLast();
+}
+function showLast(){ $('#lastFetch').textContent = (S.lastFetch ? t('lastFetch')+' '+S.lastFetch : '') + (S.refreshing ? ' ↻ '+t('updating') : ''); }
+
+/* ───────── เวลา ───────── */
+const toMs = s => Date.parse(String(s).replace(' ','T')+'Z') - TZ*36e5;
+const fmtDT = d => { const x=new Date(d.getTime()+TZ*36e5); return `${x.getUTCFullYear()}-${pad(x.getUTCMonth()+1)}-${pad(x.getUTCDate())} ${pad(x.getUTCHours())}:${pad(x.getUTCMinutes())}:${pad(x.getUTCSeconds())}`; };
+const todayStr = (offsetDays=0) => fmtDT(new Date(Date.now()+offsetDays*864e5)).slice(0,10);
+function evStatus(r){ const n=Date.now(), s=toMs(r.start_at), e=toMs(r.end_at); return n<s?'upcoming':n>e?'ended':'ongoing'; }
+
+/* ───────── แหล่งข้อมูล ───────── */
+/* เกมที่ DB เก็บเวลาเป็น UTC → บวก 7 ชม. ให้แสดงเป็น GMT+7 (เกมอื่นเก็บเป็น GMT+7 อยู่แล้ว) — เพิ่มเกมใหม่ใส่ id ที่นี่ */
+const UTC_GAMES = new Set(['a222e2ae-2b88-47bb-a39d-789ba38ccf94','ece25107-ec4f-4c83-9f2b-38afd0e77cc2','f1a18842-e3c0-42e7-b7b1-56f80d95d0bc']);
+const shiftTs = (s, h) => { if(typeof s!=='string' || !/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/.test(s)) return s; const d=new Date(Date.parse(s.slice(0,19).replace(' ','T')+'Z')+h*36e5), p=n=>String(n).padStart(2,'0'); return `${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`; };
+const Source = {
+  async call(payload){
+    const r = await fetch(DASH_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    let j; try{ j=await r.json(); }catch(e){ throw new Error('HTTP '+r.status); }
+    if(Array.isArray(j) && j.length===1 && j[0] && !Array.isArray(j[0])) j=j[0];
+    if(!r.ok || j.ok===false || j.mode==='error') throw new Error(j.error||('HTTP '+r.status));
+    return j;
+  },
+  async games(){ if(!DASH_URL) throw new Error('DASH_URL is empty'); const j=await this.call({action:'games'}); return j.games||[]; },
+  async list(game,from,to){
+    const u = UTC_GAMES.has(game);
+    // เกม UTC: ขอเผื่อล่วงหน้า 1 วัน (GMT+7 เร็วกว่า UTC 7 ชม.) แล้วกรองช่วงวันที่ซ้ำหลังบวก 7 ชม.
+    const f = (u && from) ? fmtDT(new Date(toMs(from+' 00:00:00')-864e5)).slice(0,10) : (from||'');
+    const j=await this.call({action:'list',game_id:game,from:f,to:to||''}); let rows=j.rows||[];
+    if(u){
+      rows = rows.map(r=>({...r, start_at:shiftTs(r.start_at,7), end_at:shiftTs(r.end_at,7)}));
+      if(from) rows = rows.filter(r=>String(r.end_at)>=from+' 00:00:00');
+      if(to)   rows = rows.filter(r=>String(r.start_at)<=to+' 23:59:59');
+    }
+    return rows;
+  }
+};
+
+/* ───────── state ───────── */
+const S={game:'',rows:[],sort:{k:'start_at',dir:-1},page:1,size:25,seq:0,lastFetch:''};
+const elTbl=$('#tbl');
+
+function renderGames(g){
+  $('#games').innerHTML = g.map(x=>`<button class="game" role="radio" aria-checked="${x.id===S.game}" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('') || `<span class="cnt">${t('noGames')}</span>`;
+}
+$('#games').addEventListener('click',e=>{ const b=e.target.closest('.game'); if(!b) return; S.game=b.dataset.id; lsSet('itemcode_game',S.game); document.querySelectorAll('.game').forEach(x=>x.setAttribute('aria-checked',x===b)); load(); });
+
+/* แคชผลลัพธ์ (แสดงของเดิมทันที แล้วอัปเดตเบื้องหลัง) */
+const CACHE_ON = !!DASH_URL;
+function cacheGet(k){ return CACHE_ON ? lsGet(k,null) : null; }
+function cachePut(k,v){ if(!CACHE_ON) return; lsSet(k,v); const ks=lsGet('dash_keys',[]).filter(x=>x!==k); ks.unshift(k); ks.slice(8).forEach(x=>{ try{ localStorage.removeItem(x); }catch(e){} }); lsSet('dash_keys',ks.slice(0,8)); }
+
+/* ซ่อนกิจกรรมทดสอบ/เลิกใช้: ชื่อมีคำว่า test (ทั้งคำ ไม่นับ contest/latest) หรือ "ไม่ใช้แล้ว" */
+const HIDE_RE = /(^|[^a-z])test([^a-z]|$)|ไม่ใช้แล้ว/i;
+const clean = rows => (rows||[]).filter(r => !HIDE_RE.test(String(r.NAME||'')));
+
+async function load(){
+  const my=++S.seq; if(!S.game) return;
+  const from=$('#fFrom').value, to=$('#fTo').value, key=`dash2:${S.game}:${from}:${to}`;
+  const c=cacheGet(key);
+  if(c && c.rows){ S.rows=clean(c.rows); S.page=1; S.lastFetch=c.at; render(); }
+  else elTbl.innerHTML=`<div class="state"><div class="spin"></div>${t('loading')}</div>`;
+  S.refreshing=true; showLast();
+  try{
+    const rows=await Source.list(S.game,from,to); if(my!==S.seq) return;
+    S.rows=clean(rows); if(!(c&&c.rows)) S.page=1; S.lastFetch=fmtDT(new Date()); cachePut(key,{at:S.lastFetch,rows}); render();
+  }catch(e){ if(my===S.seq && !(c&&c.rows)) elTbl.innerHTML=`<div class="state err"><b>${t('errT')}</b><br>${esc(errText(e))}</div>`; }
+  finally{ if(my===S.seq){ S.refreshing=false; showLast(); } }
+}
+
+function view(){
+  const q=$('#fName').value.trim().toLowerCase(), st=$('#fStatus').value, rm=$('#fRem').value;
+  let rows=S.rows.map(r=>({...r,_st:evStatus(r),_pct:r.total?r.used/r.total:0}));
+  if(q) rows=rows.filter(r=>`${r.NAME||''} ${r.slug||''}`.toLowerCase().includes(q));
+  if(st) rows=rows.filter(r=>r._st===st);
+  if(rm==='has') rows=rows.filter(r=>r.remaining>0);
+  if(rm==='zero') rows=rows.filter(r=>r.remaining<=0);
+  const {k,dir}=S.sort;
+  return rows.sort((a,b)=>{ const x=a[k], y=b[k]; if(typeof x==='number'&&typeof y==='number') return (x-y)*dir; return String(x??'').localeCompare(String(y??''),undefined,{numeric:true})*dir; });
+}
+
+function render(){
+  const rows=view(), sum=k=>rows.reduce((a,r)=>a+(+r[k]||0),0);
+  const total=sum('total'), used=sum('used'), rem=sum('remaining'), pct=total?Math.round(used/total*100):0;
+  $('#kpis').innerHTML=`
+    <div class="kpi"><small>${t('kEvents')}</small><div class="v">${fmtNum(rows.length)}</div><div class="sub">${t('nShown',fmtNum(rows.length),fmtNum(S.rows.length))}</div></div>
+    <div class="kpi"><small>${t('kUsed')}</small><div class="v">${fmtNum(used)}</div><div class="sub">${t('ofTotal',pct)}</div></div>
+    <div class="kpi"><small>${t('kRem')}</small><div class="v">${fmtNum(rem)}</div><div class="sub">&nbsp;</div></div>
+    <div class="kpi"><small>${t('kTotal')}</small><div class="v">${fmtNum(total)}</div><div class="sub">&nbsp;</div></div>`;
+  $('#cntText').textContent = t('nShown',fmtNum(rows.length),fmtNum(S.rows.length)) + (S.rows.length>=1000?'  ⚠ '+t('truncated'):'');
+  if(!rows.length){ elTbl.innerHTML=`<div class="state">${t('empty')}</div>`; return; }
+  const size=S.size, pages=Math.max(1,Math.ceil(rows.length/size)); S.page=Math.min(S.page,pages);
+  const from=(S.page-1)*size, slice=rows.slice(from,from+size);
+  const th=(k,l,cls='')=>`<th class="${cls}" data-s="${k}">${l}${S.sort.k===k?`<span class="ar">${S.sort.dir>0?'↑':'↓'}</span>`:''}</th>`;
+  elTbl.innerHTML=`<div class="tw"><table><thead><tr>
+    ${th('NAME',t('cName'))}${th('start_at',t('cStart'))}${th('end_at',t('cEnd'))}${th('_st',t('cStatus'))}${th('used',t('cUsed'),'r')}${th('remaining',t('cRem'),'r')}${th('total',t('cTotal'),'r')}${th('_pct',t('cPct'))}</tr></thead>
+    <tbody>${slice.map(r=>{ const p=r.total?Math.round(r.used/r.total*100):0; return `<tr>
+      <td class="name"><b>${esc(r.NAME||r.slug)}</b><div class="slug mono">${esc(r.slug)}</div></td>
+      <td class="mono">${esc(r.start_at)}</td><td class="mono">${esc(r.end_at)}</td>
+      <td><span class="st ${r._st}">${t('st_'+r._st)}</span></td>
+      <td class="r">${fmtNum(r.used)}</td><td class="r ${r.remaining<=0&&r.total>0?'rem0':''}">${fmtNum(r.remaining)}</td><td class="r">${fmtNum(r.total)}</td>
+      <td><div class="bar ${p>=100?'full':''}" title="${p}%"><i style="width:${Math.min(p,100)}%"></i></div><span class="cnt">${p}%</span></td></tr>`; }).join('')}</tbody></table></div>
+    <div class="pager"><span class="cnt">${t('showing',from+1,Math.min(rows.length,from+size),fmtNum(rows.length))}</span>
+    <div class="btns"><button data-p="${S.page-1}" ${S.page<=1?'disabled':''} aria-label="${t('prev')}">‹</button>${pageNums(S.page,pages).map(n=>n==='…'?'<span class="cnt">…</span>':`<button data-p="${n}" class="${n===S.page?'cur':''}">${n}</button>`).join('')}<button data-p="${S.page+1}" ${S.page>=pages?'disabled':''} aria-label="${t('next')}">›</button></div></div>`;
+}
+function pageNums(cur,total){ if(total<=7) return [...Array(total)].map((_,i)=>i+1); const s=new Set([1,2,cur-1,cur,cur+1,total-1,total]); const a=[...s].filter(n=>n>=1&&n<=total).sort((x,y)=>x-y); const o=[]; a.forEach((n,i)=>{ if(i&&n-a[i-1]>1) o.push('…'); o.push(n); }); return o; }
+
+elTbl.addEventListener('click',e=>{
+  const th=e.target.closest('th[data-s]'); if(th){ const k=th.dataset.s; S.sort={k,dir:S.sort.k===k?-S.sort.dir:(k==='NAME'?1:-1)}; S.page=1; render(); return; }
+  const pb=e.target.closest('.pager button[data-p]'); if(pb){ S.page=+pb.dataset.p; render(); }
+});
+
+/* filters */
+let deb;
+const reload=()=>{ clearTimeout(deb); deb=setTimeout(load,400); };
+$('#fFrom').addEventListener('change',reload); $('#fTo').addEventListener('change',reload);
+['#fName'].forEach(s=>$(s).addEventListener('input',()=>{ S.page=1; render(); }));
+['#fStatus','#fRem'].forEach(s=>$(s).addEventListener('change',()=>{ S.page=1; render(); }));
+$('#fSize').addEventListener('change',e=>{ S.size=+e.target.value; S.page=1; render(); });
+document.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>{
+  const q=b.dataset.q; $('#fTo').value = q==='all'?'':todayStr(); $('#fFrom').value = q==='all'?'':todayStr(-(+q)); load();
+}));
+$('#btnReset').addEventListener('click',()=>{ $('#fName').value=''; $('#fStatus').value=''; $('#fRem').value=''; $('#fTo').value=''; $('#fTo').value=todayStr(); $('#fFrom').value=todayStr(-7); S.sort={k:'start_at',dir:-1}; load(); });
+
+/* CSV */
+function toast(m){ const x=$('#toast'); x.textContent=m; x.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>x.classList.remove('on'),1600); }
+$('#btnCsv').addEventListener('click',()=>{
+  const rows=view(); if(!rows.length){ toast(t('noExport')); return; }
+  const cols=['slug','NAME','start_at','end_at','_st','used','remaining','total'];
+  const csv=[cols.join(','),...rows.map(r=>cols.map(c=>`"${String(r[c]??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`itemcode-dashboard-${todayStr()}.csv`; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* theme + language */
+function applyTheme(m){ if(m==='light'||m==='dark') document.documentElement.setAttribute('data-theme',m); else document.documentElement.removeAttribute('data-theme'); }
+applyTheme(lsGet('itemcode_theme',''));
+$('#btnTheme').addEventListener('click',()=>{ const cur=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'); const n=cur==='dark'?'light':'dark'; lsSet('itemcode_theme',n); applyTheme(n); });
+$('#btnLang').addEventListener('click',()=>{ LANG=LANG==='th'?'en':'th'; lsSet('itemcode_lang',LANG); applyLang(); renderGames(S.games||[]); if(S.rows.length||S.lastFetch) render(); });
+
+/* ───────── Gate: CAPTCHA + แจ้งเตือน VPN Warpnet (ผ่านแล้วใช้ได้ 30 นาที) ───────── */
+const errText = e => /failed to fetch|networkerror|load failed|network request/i.test(String(e&&e.message)) ? t('vpnHint')+' ('+e.message+')' : (e&&e.message||String(e));
+const Gate = (() => {
+  const KEY='itemcode_gate_until', TTL=30*60*1000;
+  let mem=0, ans='', el=null, waiters=[], tick=null;
+  const getUntil=()=>{ let v=0; try{ v=+localStorage.getItem(KEY)||0; }catch(e){} return Math.max(v,mem); };
+  const setUntil=v=>{ mem=v; try{ localStorage.setItem(KEY,String(v)); }catch(e){} };
+  const valid=()=>getUntil()>Date.now();
+  const rnd=n=>crypto.getRandomValues(new Uint32Array(1))[0]%n;
+  function draw(){
+    const c=el.querySelector('canvas'), x=c.getContext('2d'), W=c.width, H=c.height, CH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    ans=''; for(let i=0;i<5;i++) ans+=CH[rnd(CH.length)];
+    x.fillStyle='#f3f1ec'; x.fillRect(0,0,W,H);
+    for(let i=0;i<7;i++){ x.strokeStyle=`hsl(${rnd(360)} 45% 60% / .7)`; x.lineWidth=1+rnd(2); x.beginPath(); x.moveTo(rnd(W),rnd(H)); x.bezierCurveTo(rnd(W),rnd(H),rnd(W),rnd(H),rnd(W),rnd(H)); x.stroke(); }
+    for(let i=0;i<5;i++){ x.save(); x.translate(16+i*(W-28)/5+rnd(6), H/2+rnd(8)-2); x.rotate((rnd(50)-25)*Math.PI/180); x.font=`700 ${30+rnd(8)}px "JetBrains Mono",monospace`; x.fillStyle=`hsl(${rnd(360)} 55% 28%)`; x.textBaseline='middle'; x.fillText(ans[i],0,0); x.restore(); }
+    for(let i=0;i<70;i++){ x.fillStyle=`hsl(${rnd(360)} 40% 40% / .5)`; x.fillRect(rnd(W),rnd(H),2,2); }
+  }
+  function build(){
+    el=document.createElement('div'); el.id='gate'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.hidden=true;
+    el.innerHTML=`<form class="gcard" autocomplete="off">
+      <div class="gico">🛡️</div><h2 id="gTitle"></h2>
+      <div class="gwarn"><b id="gVpnT"></b><span id="gVpnB"></span></div>
+      <label class="glbl" id="gCap" for="gIn"></label>
+      <div class="grow"><canvas width="190" height="64" aria-hidden="true"></canvas><button type="button" class="ibtn" id="gRef"></button></div>
+      <input id="gIn" maxlength="8" autocapitalize="characters" spellcheck="false">
+      <div class="gerr" id="gErr" role="alert"></div>
+      <button class="gbtn" type="submit" id="gGo"></button>
+      <small id="gNote"></small></form>`;
+    document.body.appendChild(el);
+    el.querySelector('#gRef').onclick=()=>{ draw(); el.querySelector('#gIn').focus(); };
+    el.querySelector('form').onsubmit=ev=>{ ev.preventDefault(); const inp=el.querySelector('#gIn');
+      if(inp.value.trim().toUpperCase()===ans){ setUntil(Date.now()+TTL); el.hidden=true; document.body.style.overflow=''; inp.value=''; el.querySelector('#gErr').textContent=''; const w=waiters; waiters=[]; w.forEach(f=>f()); tickNow(); }
+      else { el.querySelector('#gErr').textContent=t('gateWrong'); inp.value=''; draw(); inp.focus(); } };
+  }
+  function texts(){
+    const s=(i,k)=>el.querySelector('#'+i).textContent=t(k);
+    s('gTitle','gateTitle'); s('gVpnT','gateVpnT'); s('gVpnB','gateVpnB'); s('gCap','gateCaptcha'); s('gRef','gateRefresh'); s('gGo','gateGo'); s('gNote','gateNote');
+  }
+  function show(){ if(!el) build(); if(!el.hidden) return; texts(); el.hidden=false; document.body.style.overflow='hidden'; draw(); setTimeout(()=>el.querySelector('#gIn').focus(),50); }
+  function tickNow(){
+    const chip=document.querySelector('#gateLeft'); const left=getUntil()-Date.now();
+    if(left<=0){ if(chip) chip.textContent=''; show(); return; }
+    if(chip){ const m=Math.floor(left/6e4), sec=Math.floor(left/1e3)%60; chip.textContent=`⏱ ${t('gateLeft')} ${m}:${String(sec).padStart(2,'0')}`; }
+  }
+  return {
+    start(){
+      clearInterval(tick); tick=setInterval(tickNow,1000); },
+    require(){ return new Promise(res=>{ if(valid()){ tickNow(); res(); } else { waiters.push(res); show(); } }); },
+    relabel(){ if(el&&!el.hidden) texts(); tickNow(); }
+  };
+})();
+
+/* init */
+(async function(){
+  $('#fTo').value=todayStr(); $('#fFrom').value=todayStr(-7);
+  applyLang(); Gate.start(); await Gate.require();
+  const want=lsGet('itemcode_game','');
+  const pick=g=>{ S.games=g; if(!g.some(x=>x.id===S.game)) S.game = g.some(x=>x.id===want)?want:(g[0]?.id||''); renderGames(g); };
+  const gc=cacheGet('dash_games');
+  if(gc && gc.length){ pick(gc); load(); Source.games().then(g=>{ cachePut('dash_games',g); if(JSON.stringify(g)!==JSON.stringify(gc)){ const old=S.game; pick(g); if(S.game!==old) load(); } }).catch(()=>{}); return; }
+  try{ const g=await Source.games(); cachePut('dash_games',g); pick(g); }
+  catch(e){ elTbl.innerHTML=`<div class="state err"><b>${t('errT')}</b><br>${esc(errText(e))}</div>`; return; }
+  load();
+})();
+</script>
+</body>
+</html>
